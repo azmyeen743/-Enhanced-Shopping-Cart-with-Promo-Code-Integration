@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Shopping Cart</title>
+<style>
+body {
+  font-family: sans-serif;
+}
+#cart {
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+#checkout {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+#promo-message {
+  margin-top: 10px;
+}
+.error {
+  color: red;
+}
+.success {
+  color: green;
+}
+
+</style>
+</head>
+<body>
+
+<h1>Shopping Cart</h1>
+
+<div id="cart">
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="cart-items">
+      </tbody>
+  </table>
+</div>
+
+<div id="checkout">
+  <h2>Checkout</h2>
+  <div id="cart-summary">
+    <p>Subtotal: <span id="subtotal">0</span></p>
+    <p>Discount: <span id="discount">0</span></p>
+    <p>Total: <span id="total">0</span></p>
+  </div>
+
+  <div id="promo-code-section">
+    <label for="promo-code">Promo Code:</label>
+    <input type="text" id="promo-code">
+    <button onclick="applyPromoCode()">Apply</button>
+    <div id="promo-message"></div>
+  </div>
+</div>
+
+<script>
+let cartItems = []; // Initialize an empty array for cart items
+let subtotal = 0;
+let discount = 0;
+let total = 0;
+let appliedPromoCode = null;
+
+// Sample product data (you would likely fetch this from a database or API)
+const products = [
+    { name: "Product A", price: 20 },
+    { name: "Product B", price: 30 },
+    { name: "Product C", price: 15 }
+];
+
+
+function addToCart(productName, productPrice) {
+    const existingProduct = cartItems.find(item => item.name === productName);
+
+    if (existingProduct) {
+        existingProduct.quantity++;
+        existingProduct.total = existingProduct.quantity * productPrice;
+
+    } else {
+        cartItems.push({ name: productName, price: productPrice, quantity: 1, total: productPrice });
+    }
+    updateCartDisplay();
+    calculateTotal();
+
+}
+
+// Example usage (you would typically call this when a user adds an item to the cart)
+addToCart("Product A", 20);
+addToCart("Product B", 30);
+addToCart("Product A", 20); // Add Product A again to increase quantity
+addToCart("Product C", 15);
+
+
+function updateCartDisplay() {
+  const cartItemsContainer = document.getElementById('cart-items');
+  cartItemsContainer.innerHTML = ''; // Clear existing items
+
+  cartItems.forEach(item => {
+    const row = cartItemsContainer.insertRow();
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.price}</td>
+      <td>${item.quantity}</td>
+      <td>${item.total}</td>
+    `;
+  });
+}
+
+
+
+function calculateTotal() {
+    subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
+    document.getElementById('subtotal').textContent = subtotal;
+
+    applyPromoCode(); // Recalculate discount and total
+}
+
+function applyPromoCode() {
+  const promoCodeInput = document.getElementById('promo-code');
+  const promoCode = promoCodeInput.value;
+  const promoMessage = document.getElementById('promo-message');
+
+    if (promoCode === appliedPromoCode) return; // Prevent multiple applications of the same code
+
+  promoMessage.textContent = ""; // Clear previous messages
+  promoMessage.classList.remove("error", "success");
+
+  if (promoCode === "ostad10") {
+    discount = subtotal * 0.10;
+    appliedPromoCode = promoCode;
+    promoMessage.textContent = "Promo code applied successfully!";
+    promoMessage.classList.add("success");
+  } else if (promoCode === "ostad5") {
+    discount = subtotal * 0.05;
+    appliedPromoCode = promoCode;
+    promoMessage.textContent = "Promo code applied successfully!";
+    promoMessage.classList.add("success");
+
+  } else if (promoCode !== ""){
+      discount = 0;
+      promoMessage.textContent = "Invalid promo code.";
+      promoMessage.classList.add("error");
+      appliedPromoCode = null;
+  }
+  else{
+      discount = 0;
+      appliedPromoCode = null;
+  }
+
+  total = subtotal - discount;
+  document.getElementById('discount').textContent = discount.toFixed(2);
+  document.getElementById('total').textContent = total.toFixed(2);
+}
+
+
+</script>
+
+</body>
+</html>
